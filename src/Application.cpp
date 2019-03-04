@@ -1,5 +1,4 @@
 #include "Application.h"
-#include "Logger/Logger.h"
 
 Application::Application(int argc, char **argv)
     : _logger(StringUtils::toString("Application ", StringUtils::hexToString(this)))

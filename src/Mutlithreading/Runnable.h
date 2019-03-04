@@ -6,7 +6,7 @@ class Runnable {
 public:
     using Ptr = std::unique_ptr<Runnable>;
     Runnable() = default;
-    ~Runnable() = default;
+    virtual ~Runnable() = default;
     virtual void run() = 0;
 };
 
