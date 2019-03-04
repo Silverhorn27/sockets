@@ -1,31 +1,34 @@
-#include <iostream>
+#include "server.h"
+
 #include <algorithm>
 #include <set>
+#include <thread>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <fcntl.h>
-
-int main(int argc, char **argv) {
-    int master_socket = socket(
-        AF_INET,
-        SOCK_STREAM,
-        IPPROTO_TCP);
-    
+Server::Server(const std::string &ip, int port) :
+    ip(ip),
+    port(port)
+{
+    _fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     std::set<int> slave_sockets;
-    struct sockaddr_in sock_addr;
-    sock_addr.sin_family = AF_INET;
-    sock_addr.sin_port = htons(12343);
-    sock_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    bind(master_socket, (struct sockaddr *)(&sock_addr), sizeof(sock_addr));
-    listen(master_socket, SOMAXCONN);
+    _fdaddr.sin_family = AF_INET;
+    _fdaddr.sin_port = htons(port);
+    _fdaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    inet_pton(_fd, ip.c_str(), &_fdaddr.sin_addr);
+}
+
+void Server::start() {
+    int enable = 1;
+    if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0) {
+        std::cout << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+    }
+    bind(_fd, (struct sockaddr *)(&_fdaddr), sizeof(_fdaddr));
+    listen(_fd, SOMAXCONN);
+    std::set<int> slave_sockets;
 
     while(true) {
         fd_set set;
         FD_ZERO(&set);
-        FD_SET(master_socket, &set);
+        FD_SET(_fd, &set);
         for(auto &socket : slave_sockets) {
             FD_SET(socket, &set);
         }
@@ -34,7 +37,7 @@ int main(int argc, char **argv) {
         timeout.tv_sec = 10;
         timeout.tv_usec = 0;
 
-        int max = std::max(master_socket, *std::max_element(slave_sockets.begin(), slave_sockets.end()));
+        int max = std::max(_fd, *std::max_element(slave_sockets.begin(), slave_sockets.end()));
         select(max+1, &set, NULL, NULL, NULL);
         for(auto &socket : slave_sockets) {
             if (FD_ISSET(socket, &set)) {
@@ -48,8 +51,8 @@ int main(int argc, char **argv) {
                 int recv_size = recv(socket, buffer, 1024, MSG_NOSIGNAL);
                 if (recv_size <= 0) {
                     if (recv_size < 0) {
-			std::cout << "error. recv_size is: " << recv_size << std::endl;
-		    }
+			            std::cout << "error. recv_size is: " << recv_size << std::endl;
+		            }
                     close(socket);
                     slave_sockets.erase(socket);
                 } else {
@@ -57,11 +60,9 @@ int main(int argc, char **argv) {
                 }
             }
         }
-        if (FD_ISSET(master_socket, &set)) {
-            int slave_socket = accept(master_socket, 0, 0);
+        if (FD_ISSET(_fd, &set)) {
+            int slave_socket = accept(_fd, 0, 0);
             slave_sockets.insert(slave_socket);
         }
     }
-
-    return 0;
 }
