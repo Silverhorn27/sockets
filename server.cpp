@@ -46,11 +46,13 @@ int main(int argc, char **argv) {
                 }
                 static char buffer[1024];
                 int recv_size = recv(socket, buffer, 1024, MSG_NOSIGNAL);
-                if (recv_size == 0) {
-                    shutdown(socket, SHUT_RDWR);
+                if (recv_size <= 0) {
+                    if (recv_size < 0) {
+			std::cout << "error. recv_size is: " << recv_size << std::endl;
+		    }
                     close(socket);
                     slave_sockets.erase(socket);
-                } else if (recv_size != 0) {
+                } else {
                     send(socket, buffer, recv_size, MSG_NOSIGNAL);
                 }
             }
