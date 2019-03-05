@@ -4,6 +4,7 @@ Application::Application(int argc, char **argv)
     : _logger(StringUtils::toString("Application ", StringUtils::hexToString(this)))
 {
     init(argc, argv);
+    _server.init(argv[1], atoi(argv[2]));
 }
 
 void Application::init(int argc, char **argv)
@@ -21,7 +22,9 @@ const vector<string>& Application::getArgs() const
 int Application::start()
 {
     printArgs();
-
+    _logger.log("Server starting...");
+    
+    _server.start();
     // do something, start server ...
 
     return 0;

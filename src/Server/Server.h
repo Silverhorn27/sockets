@@ -1,6 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include "definions.h"
 #include <iostream>
 
 #include <sys/types.h>
@@ -16,7 +17,9 @@ private:
     std::string ip;
     int port;
 public:
-    Server(const std::string &ip, int port);
+    Server() = default;
+    Server(const string &ip, int port);
+    void init(const string &ip, int port);
     void start();
 };
 

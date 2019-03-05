@@ -1,4 +1,4 @@
-#include "server.h"
+#include "Server.h"
 
 #include <algorithm>
 #include <set>
@@ -7,6 +7,11 @@
 Server::Server(const std::string &ip, int port) :
     ip(ip),
     port(port)
+{
+    init(ip, port);
+}
+
+void Server::init(const string &ip, int port) 
 {
     _fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     std::set<int> slave_sockets;

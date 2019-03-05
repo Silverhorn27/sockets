@@ -3,12 +3,14 @@
 
 #include "definions.h"
 #include "Logger/Logger.h"
+#include "Server/Server.h"
 #include <vector>
 using std::vector;
 
 class Application
 {
     Logger _logger;
+    Server _server;
     vector<string> _args;
 
 public:
