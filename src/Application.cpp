@@ -1,11 +1,12 @@
 #include "Application.h"
 
 Application::Application(int argc, char **argv)
-    : _logger(StringUtils::toString("Application ", StringUtils::hexToString(this)))
+    : _logger(StringUtils::toString("Application ", StringUtils::hexToString(this))),
+    _server(argv[1], atoi(argv[2]))
 {
     init(argc, argv);
     if (_args.size() == 3) {
-        _server.init(argv[1], atoi(argv[2]));
+        _logger.log(Logger::Notice, "Create server");
     } else {
         _logger.log(Logger::Error, "Was passed wrong arguments");
     }
