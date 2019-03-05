@@ -7,11 +7,32 @@ using std::chrono::system_clock;
 using std::chrono::duration_cast;
 
 std::mutex Logger::_mutex;
+std::atomic<Logger::Level> Logger::_logLevel(Logger::Level::Info);
 
 Logger::Logger(const std::__cxx11::string &name)
     : _name(name)
 {
 
+}
+
+void Logger::setLevel(Logger::Level level)
+{
+    Logger::_logLevel = level;
+}
+
+char Logger::describeLevel(Logger::Level level)
+{
+    switch (level)
+    {
+    case Trace:   return 'T';
+    case Debug:   return 'D';
+    case Info:    return 'I';
+    case Notice:  return 'N';
+    case Warning: return 'W';
+    case Error:   return 'E';
+    case Critical:return 'C';
+    }
+    return 'U'; // Unknown
 }
 
 static string timeToString(int value, size_t len = 2)

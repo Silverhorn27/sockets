@@ -22,10 +22,10 @@ const vector<string>& Application::getArgs() const
 int Application::start()
 {
     printArgs();
-    _logger.log("Server starting...");
+
+    _logger.log(Logger::Notice, "Server starting...");
     
     _server.start();
-    // do something, start server ...
 
     return 0;
 }
@@ -37,5 +37,5 @@ void Application::printArgs()
         msg += (arg + "\n");
     }
 
-    _logger.log("Running with args:", msg);
+    _logger.log(Logger::Info, "Running with args:", msg);
 }
