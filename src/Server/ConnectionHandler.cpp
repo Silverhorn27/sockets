@@ -1,5 +1,7 @@
 #include "ConnectionHandler.h"
 #include "Utils/StringUtils.h"
+#include <sys/socket.h>
+#include <unistd.h>
 
 #include <string.h>
 #include <poll.h>
