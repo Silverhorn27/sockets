@@ -10,6 +10,8 @@ set(SOURCES
     ${PREFIX}/main.cpp
     ${PREFIX}/Logger/Logger.h
     ${PREFIX}/Logger/Logger.cpp
+    ${PREFIX}/Server/Server.h
+    ${PREFIX}/Server/Server.cpp
     ${PREFIX}/Utils/StringUtils.h
     ${PREFIX}/Utils/StringUtils.cpp
     ${PREFIX}/definions.h
