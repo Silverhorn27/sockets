@@ -11,6 +11,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include "Mutlithreading/All.h"
+#include "Logger/Logger.h"
 
 
 class BindServerExeption : public std::exception {
@@ -28,6 +29,8 @@ private:
     int port;
     bool _requestStop;
     ThreadPool _threadPool;
+    Logger _logger;
+    
 public:
     Server() = default;
     Server(const string &ip, int port);

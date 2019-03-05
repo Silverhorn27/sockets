@@ -10,7 +10,8 @@
 Server::Server(const std::string &ip, int port) :
     ip(ip),
     port(port),
-    _threadPool(8)
+    _threadPool(8),
+    _logger(StringUtils::toString("Server ", StringUtils::hexToString(this)))
 {
     init(ip, port);
 }
@@ -23,9 +24,12 @@ void Server::init(const string &ip, int port)
     _fdaddr.sin_family = AF_INET;
     _fdaddr.sin_port = htons(port);
     _fdaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    inet_pton(_fd, ip.c_str(), &_fdaddr.sin_addr);
+    if (inet_pton(_fd, ip.c_str(), &_fdaddr.sin_addr) == -1) {
+        _logger.log(Logger::Error, "Error in inet_pton()");
+    }
 }
 
+/*
 void Server::start() {
     int enable = 1;
     if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0) {
@@ -78,14 +82,17 @@ void Server::start() {
         }
     }
 }
+*/
 
 void Server::startClientAcceptor()
 {
     int enable = 1;
     if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0) {
-        std::cout << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+        _logger.log(Logger::Error, "setsockopt(SO_REUSEADDR) failed");
     }
-    bind(_fd, (struct sockaddr *)(&_fdaddr), sizeof(_fdaddr));
+    if (bind(_fd, (struct sockaddr *)(&_fdaddr), sizeof(_fdaddr)) < 0) {
+        throw BindServerExeption();
+    }
     listen(_fd, SOMAXCONN);
 
     const int timeoutInMsec = 1000;
