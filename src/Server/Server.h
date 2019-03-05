@@ -3,12 +3,20 @@
 
 #include "definions.h"
 #include <iostream>
+#include <exception>
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+
+class BindServerExeption : public std::exception {
+public:
+    virtual const char* what() const throw () {
+        return "Error binding server";
+    }
+};
 
 class Server {
 private:

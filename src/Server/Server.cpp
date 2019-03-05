@@ -26,7 +26,9 @@ void Server::start() {
     if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0) {
         std::cout << "setsockopt(SO_REUSEADDR) failed" << std::endl;
     }
-    bind(_fd, (struct sockaddr *)(&_fdaddr), sizeof(_fdaddr));
+    if (bind(_fd, (struct sockaddr *)(&_fdaddr), sizeof(_fdaddr)) == -1) {
+        throw BindServerExeption();
+    } 
     listen(_fd, SOMAXCONN);
     std::set<int> slave_sockets;
 
