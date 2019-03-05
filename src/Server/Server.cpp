@@ -3,16 +3,21 @@
 #include <algorithm>
 #include <set>
 #include <thread>
+#include <poll.h>
+#include <string.h>
+#include "ConnectionHandler.h"
 
 Server::Server(const std::string &ip, int port) :
     ip(ip),
-    port(port)
+    port(port),
+    _threadPool(8)
 {
     init(ip, port);
 }
 
 void Server::init(const string &ip, int port) 
 {
+    _requestStop = false;
     _fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     std::set<int> slave_sockets;
     _fdaddr.sin_family = AF_INET;
@@ -28,7 +33,7 @@ void Server::start() {
     }
     if (bind(_fd, (struct sockaddr *)(&_fdaddr), sizeof(_fdaddr)) == -1) {
         throw BindServerExeption();
-    } 
+    }
     listen(_fd, SOMAXCONN);
     std::set<int> slave_sockets;
 
@@ -70,6 +75,30 @@ void Server::start() {
         if (FD_ISSET(_fd, &set)) {
             int slave_socket = accept(_fd, 0, 0);
             slave_sockets.insert(slave_socket);
+        }
+    }
+}
+
+void Server::startClientAcceptor()
+{
+    int enable = 1;
+    if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0) {
+        std::cout << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+    }
+    bind(_fd, (struct sockaddr *)(&_fdaddr), sizeof(_fdaddr));
+    listen(_fd, SOMAXCONN);
+
+    const int timeoutInMsec = 1000;
+    while (!_requestStop) {
+        struct pollfd p;
+        bzero(&p, sizeof(p));
+        p.fd = _fd;
+        p.events = POLLIN;
+        int ret = poll(&p, 1, timeoutInMsec);
+        if (ret > 0) {
+            int slavefd = accept(p.fd, 0, 0);
+            ConnectionHandler::Ptr newConnection(new ConnectionHandler(slavefd));
+            _threadPool.start(std::move(newConnection), true);
         }
     }
 }

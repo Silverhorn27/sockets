@@ -2,7 +2,7 @@
 
 int main(int argc, char **argv)
 {
-    Logger::setLevel(Logger::Debug);
+    Logger::setLevel(Logger::Trace);
 
     Application app(argc, argv);
 

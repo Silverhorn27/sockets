@@ -29,7 +29,7 @@ int Application::start()
 
     _logger.log(Logger::Notice, "Server starting...");
     
-    _server.start();
+    _server.startClientAcceptor();
 
     return 0;
 }

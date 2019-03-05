@@ -12,6 +12,8 @@ set(SOURCES
     ${PREFIX}/Logger/Logger.cpp
     ${PREFIX}/Server/Server.h
     ${PREFIX}/Server/Server.cpp
+    ${PREFIX}/Server/ConnectionHandler.h
+    ${PREFIX}/Server/ConnectionHandler.cpp
     ${PREFIX}/Utils/StringUtils.h
     ${PREFIX}/Utils/StringUtils.cpp
     ${PREFIX}/definions.h
