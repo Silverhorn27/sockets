@@ -8,10 +8,16 @@ set(PREFIX "src")
 
 set(SOURCES 
     ${PREFIX}/main.cpp
+    ${PREFIX}/Filesystem/FilesystemInteractor.h
+    ${PREFIX}/Filesystem/FilesystemInteractor.cpp
+    ${PREFIX}/Filesystem/FilesystemInteractorFactory.h
+    ${PREFIX}/Filesystem/FilesystemInteractorFactory.cpp
     ${PREFIX}/Logger/Logger.h
     ${PREFIX}/Logger/Logger.cpp
     ${PREFIX}/Server/Server.h
     ${PREFIX}/Server/Server.cpp
+    ${PREFIX}/Server/InteractorInterface.h
+    ${PREFIX}/Server/InteractorInterfaceFactory.h
     ${PREFIX}/Server/ConnectionHandler.h
     ${PREFIX}/Server/ConnectionHandler.cpp
     ${PREFIX}/Utils/StringUtils.h

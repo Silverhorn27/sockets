@@ -6,10 +6,11 @@
 #include <string.h>
 #include <poll.h>
 
-ConnectionHandler::ConnectionHandler(int fd)
+ConnectionHandler::ConnectionHandler(InteractorInterface *interactor, int fd)
     : _logger(StringUtils::toString("ConnectionHandler ", StringUtils::hexToString(this)))
     , _socketfd(fd)
     , _requestStop(false)
+    , _interactor(interactor)
 {
 
 }
@@ -54,6 +55,8 @@ void ConnectionHandler::onReceive()
         _logger.log(Logger::Debug, buffer);
         if (buffer == "close") {
             requestStop();
+        } else {
+            _interactor->onReceiveData(buffer, static_cast<size_t>(recv_size));
         }
         send(_socketfd, buffer, recv_size, MSG_NOSIGNAL);
     }
@@ -65,6 +68,7 @@ void ConnectionHandler::onTimeout()
     
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     
+    _interactor->onSocketTimeout();
 }
 
 void ConnectionHandler::requestStop() {

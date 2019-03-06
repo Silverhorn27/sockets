@@ -1,9 +1,12 @@
 #include "Application.h"
+#include "Filesystem/FilesystemInteractorFactory.h"
 
 Application::Application(int argc, char **argv)
     : _logger(StringUtils::toString("Application ", StringUtils::hexToString(this))),
-    _server(argv[1], atoi(argv[2]))
+    _server("127.0.0.1", 4444)
 {
+    _server.setFactory(new FilesystemInteractorFactory);
+
     init(argc, argv);
     if (_args.size() == 3) {
         _logger.log(Logger::Notice, "Create server");

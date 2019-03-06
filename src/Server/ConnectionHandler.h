@@ -3,14 +3,17 @@
 
 #include "Mutlithreading/All.h"
 #include "Logger/Logger.h"
+#include "InteractorInterface.h"
 
 class ConnectionHandler : public Runnable
 {
     Logger _logger;
     int _socketfd;
     bool _requestStop;
+    InteractorInterface *_interactor;
+
 public:
-    ConnectionHandler(int fd);
+    ConnectionHandler(InteractorInterface *interactor, int fd);
     void run() override;
     void requestStop();
 

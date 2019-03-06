@@ -16,6 +16,11 @@ Server::Server(const std::string &ip, int port) :
     init(ip, port);
 }
 
+void Server::setFactory(InteractorInterfaceFactory *factory)
+{
+    _factory = factory;
+}
+
 void Server::init(const string &ip, int port) 
 {
     _requestStop = false;
@@ -104,7 +109,7 @@ void Server::startClientAcceptor()
         int ret = poll(&p, 1, timeoutInMsec);
         if (ret > 0) {
             int slavefd = accept(p.fd, 0, 0);
-            ConnectionHandler::Ptr newConnection(new ConnectionHandler(slavefd));
+            ConnectionHandler::Ptr newConnection(new ConnectionHandler(_factory->createInteractorObject(), slavefd));
             _threadPool.start(std::move(newConnection), true);
         }
     }

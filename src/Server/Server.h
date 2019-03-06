@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include "Mutlithreading/All.h"
 #include "Logger/Logger.h"
+#include "InteractorInterfaceFactory.h"
 
 
 class BindServerExeption : public std::exception {
@@ -30,10 +31,12 @@ private:
     bool _requestStop;
     ThreadPool _threadPool;
     Logger _logger;
+    InteractorInterfaceFactory *_factory;
     
 public:
     Server() = default;
     Server(const string &ip, int port);
+    void setFactory(InteractorInterfaceFactory *factory);
     void init(const string &ip, int port);
     void start();
     void startClientAcceptor();
