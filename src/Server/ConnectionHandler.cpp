@@ -11,6 +11,7 @@ ConnectionHandler::ConnectionHandler(int fd)
     , _socketfd(fd)
     , _requestStop(false)
     , _buffer(DEFAULT_BUFFER_SIZE)
+    , _state(State::Disconect)
 {
 
 }
@@ -27,9 +28,11 @@ void ConnectionHandler::run()
         int ret = poll(&p, 1, timeoutInMsec);
         if (ret > 0) {
             if (p.revents & POLLIN) {
+                _state = State::Active;
                 onReceive();
             }
         } else {
+            _state = State::Inactive;
             _logger.log(Logger::Debug, "timeout");
             onTimeout();
         }
@@ -58,6 +61,7 @@ void ConnectionHandler::onReceive()
         if (string(&_buffer[0]) == "close") {
             _logger.log(Logger::Info, "The connection is torn");
             close(_socketfd);
+            _state = State::Disconect;
             requestStop();
         }
     }
@@ -68,6 +72,26 @@ void ConnectionHandler::onTimeout()
     _logger.log(Logger::Trace, __PRETTY_FUNCTION__);
 }
 
-void ConnectionHandler::requestStop() {
+void ConnectionHandler::requestStop() 
+{
     _requestStop = true;
+}
+
+void ConnectionHandler::setState(State state) 
+{
+    _state = state;
+}
+
+bool ConnectionHandler::connectionActive() 
+{
+    return _state == State::Active ? true : false;
+}
+
+void ConnectionHandler::setBufferSize(size_t bufferSize)
+{
+    if (bufferSize <= MAX_BUFFER_SIZE) {
+        _buffer.resize(bufferSize);
+    } else {
+        _logger.log(Logger::Error, "Exceeded MAX_BUFFER_SIZE: ", bufferSize);
+    }
 }
