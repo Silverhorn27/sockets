@@ -10,6 +10,7 @@ ConnectionHandler::ConnectionHandler(int fd)
     : _logger(StringUtils::toString("ConnectionHandler ", StringUtils::hexToString(this)))
     , _socketfd(fd)
     , _requestStop(false)
+    , _buffer(DEFAULT_BUFFER_SIZE)
 {
 
 }
@@ -44,18 +45,17 @@ void ConnectionHandler::onReceive()
         char l[]{"This is some big text. for something checks"};
 
     }
-    Buffer buffer;
-    buffer.resize(DEFAULT_BUFFER_SIZE);
-    ssize_t recv_size = recv(_socketfd, &buffer[0], sizeof(buffer)-1, MSG_NOSIGNAL);
+    _buffer.resize(64);
+    ssize_t recv_size = recv(_socketfd, &_buffer[0], sizeof(_buffer)-1, MSG_NOSIGNAL);
     if (recv_size <= 0) {
         if (recv_size < 0) {
             _logger.log(Logger::Debug, "error. recv_size is: ", recv_size);
 	    }
         close(_socketfd);
     } else {
-  //      buffer[recv_size] = '\0';
-        _logger.log(Logger::Debug, &buffer[0]);
-        if (string(&buffer[0]) == "close") {
+        _buffer[recv_size] = '\0';
+        _logger.log(Logger::Debug, &_buffer[0]);
+        if (string(&_buffer[0]) == "close") {
             _logger.log(Logger::Info, "The connection is torn");
             close(_socketfd);
             requestStop();

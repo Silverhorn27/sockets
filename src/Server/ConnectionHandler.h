@@ -9,6 +9,8 @@ class ConnectionHandler : public Runnable
     Logger _logger;
     int _socketfd;
     bool _requestStop;
+    Buffer _buffer;
+
 public:
     ConnectionHandler(int fd);
     void run() override;
