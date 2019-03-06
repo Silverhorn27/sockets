@@ -44,8 +44,8 @@ void ConnectionHandler::onReceive()
         char l[]{"This is some big text. for something checks"};
 
     }
-    char buffer[1024];
-    int recv_size = recv(_socketfd, buffer, sizeof(buffer), MSG_NOSIGNAL);
+    char buffer[DEFAULT_BUFFER_SIZE];
+    ssize_t recv_size = recv(_socketfd, buffer, sizeof(buffer)-1, MSG_NOSIGNAL);
     if (recv_size <= 0) {
         if (recv_size < 0) {
             _logger.log(Logger::Debug, "error. recv_size is: ", recv_size);
@@ -54,16 +54,17 @@ void ConnectionHandler::onReceive()
     } else {
         buffer[recv_size] = '\0';
         _logger.log(Logger::Debug, buffer);
-        send(_socketfd, buffer, recv_size, MSG_NOSIGNAL);
+        if (string(buffer) == "close") {
+            close(_socketfd);
+            requestStop();
+        }
+        send(_socketfd, buffer, static_cast<size_t>(recv_size), MSG_NOSIGNAL);
     }
 }
 
 void ConnectionHandler::onTimeout()
 {
     _logger.log(Logger::Trace, __PRETTY_FUNCTION__);
-    _logger.log(Logger::Info, "Client disconect");
-    close(_socketfd);
-    requestStop();
 }
 
 void ConnectionHandler::requestStop() {
