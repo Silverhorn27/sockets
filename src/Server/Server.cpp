@@ -24,7 +24,7 @@ void Server::init(const string &ip, int port)
     _fdaddr.sin_family = AF_INET;
     _fdaddr.sin_port = htons(static_cast<uint16_t>(port));
     _fdaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (inet_pton(_fd, ip.c_str(), &_fdaddr.sin_addr) == -1) {
+    if (inet_pton(AF_INET, ip.c_str(), &_fdaddr.sin_addr) == -1) {
         _logger.log(Logger::Error, "Error in inet_pton()");
     }
 }
