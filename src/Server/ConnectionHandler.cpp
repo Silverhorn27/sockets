@@ -65,7 +65,7 @@ void ConnectionHandler::onReceive()
             setState(State::Disconnect);
             requestStop();
         } else {
-            _interactor->onReceiveData(buffer, static_cast<size_t>(recv_size));
+            _interactor->onReceiveData(&_buffer[0], static_cast<size_t>(recv_size));
         }
     }
 }
