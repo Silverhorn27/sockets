@@ -19,9 +19,12 @@ private:
     Logger _logger;
     int _socketfd;
     bool _requestStop;
+<<<<<<< HEAD
     InteractorInterface *_interactor;
+=======
     Buffer _buffer;
     State _state;
+>>>>>>> 35aa9dc357530d0dbf5d26b2f16c31bba9521275
 
 public:
     ConnectionHandler(InteractorInterface *interactor, int fd);

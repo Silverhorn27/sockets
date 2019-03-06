@@ -7,11 +7,11 @@
 #include <string.h>
 #include "ConnectionHandler.h"
 
-Server::Server(const std::string &ip, int port) :
-    ip(ip),
-    port(port),
-    _threadPool(8),
-    _logger(StringUtils::toString("Server ", StringUtils::hexToString(this)))
+Server::Server(const std::string &ip, int port)
+    : ip(ip)
+    , port(port)
+    , _threadPool(8)
+    , _logger(StringUtils::toString("Server ", StringUtils::hexToString(this)))
 {
     init(ip, port);
 }
@@ -21,15 +21,15 @@ void Server::setFactory(InteractorInterfaceFactory *factory)
     _factory = factory;
 }
 
-void Server::init(const string &ip, int port) 
+void Server::init(const string &ip, int port)
 {
     _requestStop = false;
     _fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     std::set<int> slave_sockets;
     _fdaddr.sin_family = AF_INET;
-    _fdaddr.sin_port = htons(port);
+    _fdaddr.sin_port = htons(static_cast<uint16_t>(port));
     _fdaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (inet_pton(_fd, ip.c_str(), &_fdaddr.sin_addr) == -1) {
+    if (inet_pton(AF_INET, ip.c_str(), &_fdaddr.sin_addr) == -1) {
         _logger.log(Logger::Error, "Error in inet_pton()");
     }
 }
@@ -108,7 +108,7 @@ void Server::startClientAcceptor()
         p.events = POLLIN;
         int ret = poll(&p, 1, timeoutInMsec);
         if (ret > 0) {
-            int slavefd = accept(p.fd, 0, 0);
+            int slavefd = accept(p.fd, nullptr, nullptr);
             ConnectionHandler::Ptr newConnection(new ConnectionHandler(_factory->createInteractorObject(), slavefd));
             _threadPool.start(std::move(newConnection), true);
         }

@@ -10,9 +10,12 @@ ConnectionHandler::ConnectionHandler(InteractorInterface *interactor, int fd)
     : _logger(StringUtils::toString("ConnectionHandler ", StringUtils::hexToString(this)))
     , _socketfd(fd)
     , _requestStop(false)
+<<<<<<< HEAD
     , _interactor(interactor)
+=======
     , _buffer(DEFAULT_BUFFER_SIZE)
     , _state(State::Disconnect)
+>>>>>>> 35aa9dc357530d0dbf5d26b2f16c31bba9521275
 {
 
 }
@@ -73,6 +76,13 @@ void ConnectionHandler::onReceive()
 void ConnectionHandler::onTimeout()
 {
     _logger.log(Logger::Trace, __PRETTY_FUNCTION__);
+<<<<<<< HEAD
+    
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    
+    _interactor->onSocketTimeout();
+=======
+>>>>>>> 35aa9dc357530d0dbf5d26b2f16c31bba9521275
 }
 
 void ConnectionHandler::requestStop() 
