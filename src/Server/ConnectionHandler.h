@@ -10,7 +10,8 @@ public:
     enum State : int {
             Active,
             Inactive,
-            Disconect
+            Disconnect,
+            Connect
         };
 
 private:
@@ -25,12 +26,13 @@ public:
     void run() override;
     void requestStop();
     bool connectionActive();
-    void setState(State state);
-    void setBufferSize(size_t bufferSize);
+    bool setBufferSize(size_t bufferSize);
+    char getStatus();
 
 private:
     void onReceive();
     void onTimeout();
+    void setState(State state);
 };
 
 #endif // CONNECTION_HANDLER_H

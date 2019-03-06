@@ -11,7 +11,7 @@ ConnectionHandler::ConnectionHandler(int fd)
     , _socketfd(fd)
     , _requestStop(false)
     , _buffer(DEFAULT_BUFFER_SIZE)
-    , _state(State::Disconect)
+    , _state(State::Disconnect)
 {
 
 }
@@ -27,12 +27,13 @@ void ConnectionHandler::run()
 
         int ret = poll(&p, 1, timeoutInMsec);
         if (ret > 0) {
+            setState(State::Connect);
             if (p.revents & POLLIN) {
-                _state = State::Active;
+                setState(State::Active);
                 onReceive();
             }
         } else {
-            _state = State::Inactive;
+            setState(State::Inactive);
             _logger.log(Logger::Debug, "timeout");
             onTimeout();
         }
@@ -48,7 +49,6 @@ void ConnectionHandler::onReceive()
         char l[]{"This is some big text. for something checks"};
 
     }
-    _buffer.resize(64);
     ssize_t recv_size = recv(_socketfd, &_buffer[0], sizeof(_buffer)-1, MSG_NOSIGNAL);
     if (recv_size <= 0) {
         if (recv_size < 0) {
@@ -61,7 +61,7 @@ void ConnectionHandler::onReceive()
         if (string(&_buffer[0]) == "close") {
             _logger.log(Logger::Info, "The connection is torn");
             close(_socketfd);
-            _state = State::Disconect;
+            setState(State::Disconnect);
             requestStop();
         }
     }
@@ -87,11 +87,25 @@ bool ConnectionHandler::connectionActive()
     return _state == State::Active ? true : false;
 }
 
-void ConnectionHandler::setBufferSize(size_t bufferSize)
+bool ConnectionHandler::setBufferSize(size_t bufferSize)
 {
     if (bufferSize <= MAX_BUFFER_SIZE) {
         _buffer.resize(bufferSize);
+        return true;
     } else {
         _logger.log(Logger::Error, "Exceeded MAX_BUFFER_SIZE: ", bufferSize);
+        return false;
     }
+}
+
+char ConnectionHandler::getStatus()
+{
+    switch (_state)
+    {
+        case Active:     return 'A';
+        case Inactive:   return 'I';
+        case Connect:    return 'C';
+        case Disconnect: return 'D';
+    }
+    return 'U';
 }
