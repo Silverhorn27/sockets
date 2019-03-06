@@ -51,8 +51,9 @@ void ConnectionHandler::onReceive()
 	    }
         close(_socketfd);
     } else {
+        buffer[recv_size] = '\0';
         _logger.log(Logger::Debug, buffer);
-        if (buffer == "close") {
+        if (string(buffer) == "close") { // doesn't working
             requestStop();
         }
         send(_socketfd, buffer, recv_size, MSG_NOSIGNAL);
