@@ -39,6 +39,10 @@ void ConnectionHandler::run()
 void ConnectionHandler::onReceive()
 {
     _logger.log(Logger::Trace, __PRETTY_FUNCTION__);
+    {
+        char l[]{"This is some big text. for something checks"};
+
+    }
     char buffer[1024];
     int recv_size = recv(_socketfd, buffer, sizeof(buffer), MSG_NOSIGNAL);
     if (recv_size <= 0) {
