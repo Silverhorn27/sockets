@@ -9,6 +9,7 @@ using std::vector;
 
 using Buffer = vector<char>;
 
-#define DEFAULT_BUFFER_SIZE 1024
+#define MAX_BUFFER_SIZE 4096
+#define DEFAULT_BUFFER_SIZE 256
 
 #endif // DEFINIONS_H
