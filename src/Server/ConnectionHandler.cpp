@@ -27,9 +27,10 @@ void ConnectionHandler::run()
         if (ret > 0) {
             if (p.revents & POLLIN) {
                 onReceive();
-            } else {
-                onTimeout();
             }
+        } else {
+            _logger.log(Logger::Debug, "timeout");
+            onTimeout();
         }
         // check poll and doing onReceive or onTimeout
         Thread::sleep(10);
@@ -53,9 +54,6 @@ void ConnectionHandler::onReceive()
     } else {
         buffer[recv_size] = '\0';
         _logger.log(Logger::Debug, buffer);
-        if (string(buffer) == "close") { // doesn't working
-            requestStop();
-        }
         send(_socketfd, buffer, recv_size, MSG_NOSIGNAL);
     }
 }
@@ -63,9 +61,9 @@ void ConnectionHandler::onReceive()
 void ConnectionHandler::onTimeout()
 {
     _logger.log(Logger::Trace, __PRETTY_FUNCTION__);
-    
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    
+    _logger.log(Logger::Info, "Client disconect");
+    close(_socketfd);
+    requestStop();
 }
 
 void ConnectionHandler::requestStop() {
