@@ -44,21 +44,22 @@ void ConnectionHandler::onReceive()
         char l[]{"This is some big text. for something checks"};
 
     }
-    char buffer[DEFAULT_BUFFER_SIZE];
-    ssize_t recv_size = recv(_socketfd, buffer, sizeof(buffer)-1, MSG_NOSIGNAL);
+    Buffer buffer;
+    buffer.resize(DEFAULT_BUFFER_SIZE);
+    ssize_t recv_size = recv(_socketfd, &buffer[0], sizeof(buffer)-1, MSG_NOSIGNAL);
     if (recv_size <= 0) {
         if (recv_size < 0) {
             _logger.log(Logger::Debug, "error. recv_size is: ", recv_size);
 	    }
         close(_socketfd);
     } else {
-        buffer[recv_size] = '\0';
-        _logger.log(Logger::Debug, buffer);
-        if (string(buffer) == "close") {
+  //      buffer[recv_size] = '\0';
+        _logger.log(Logger::Debug, &buffer[0]);
+        if (string(&buffer[0]) == "close") {
+            _logger.log(Logger::Info, "The connection is torn");
             close(_socketfd);
             requestStop();
         }
-        send(_socketfd, buffer, static_cast<size_t>(recv_size), MSG_NOSIGNAL);
     }
 }
 
