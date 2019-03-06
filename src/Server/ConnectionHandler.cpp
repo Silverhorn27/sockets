@@ -17,13 +17,13 @@ ConnectionHandler::ConnectionHandler(int fd)
 void ConnectionHandler::run()
 {
     _logger.log(Logger::Trace, __PRETTY_FUNCTION__);
-    const int timeoutInMsec = 10000;
+    const int timeoutInMsec = 5000;
     while (!_requestStop) {
         struct pollfd p;
         p.fd = _socketfd;
         p.events = POLLIN;
 
-        int ret = poll(&p, _socketfd, timeoutInMsec);
+        int ret = poll(&p, 1, timeoutInMsec);
         if (ret > 0) {
             if (p.revents & POLLIN) {
                 onReceive();
