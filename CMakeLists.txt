@@ -22,6 +22,8 @@ set(SOURCES
     ${PREFIX}/Server/ConnectionHandler.cpp
     ${PREFIX}/Utils/StringUtils.h
     ${PREFIX}/Utils/StringUtils.cpp
+    ${PREFIX}/Utils/ConfigReader.h
+    ${PREFIX}/Utils/ConfigReader.cpp
     ${PREFIX}/definions.h
     ${PREFIX}/Application.h
     ${PREFIX}/Application.cpp

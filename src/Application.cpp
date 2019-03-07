@@ -1,17 +1,18 @@
 #include "Application.h"
 #include "Filesystem/FilesystemInteractorFactory.h"
 
-Application::Application(int argc, char **argv)
-    : _logger(StringUtils::toString("Application ", StringUtils::hexToString(this))),
-    _server("127.0.0.1", 4444)
-{
-    _server.setFactory(new FilesystemInteractorFactory);
+static const string LOGGER_LEVEL = "logger.level";
 
-    init(argc, argv);
-    if (_args.size() == 3) {
-        _logger.log(Logger::Notice, "Create server");
-    } else {
-        _logger.log(Logger::Error, "Was passed wrong arguments");
+Application::Application(int argc, char **argv)
+    : _logger(StringUtils::toString("Application ", StringUtils::hexToString(this)))
+    , _server(nullptr)
+    , _config(CONFIG_FILE)
+{
+    try {
+        init(argc, argv);
+    } catch (std::exception &ex) {
+        _logger.log(Logger::Critical, "Caught '", ex.what(), "'. At ", __FILE__, ':', __LINE__);
+        throw;
     }
 }
 
@@ -20,6 +21,8 @@ void Application::init(int argc, char **argv)
     for (int i = 0; i < argc; ++i) {
         _args.emplace_back(argv[i]);
     }
+
+    Logger::setLevel(Logger::levelFromName(_config[LOGGER_LEVEL]));
 }
 
 const vector<string>& Application::getArgs() const
@@ -29,13 +32,23 @@ const vector<string>& Application::getArgs() const
 
 int Application::start()
 {
-    printArgs();
+    try {
+        printArgs();
 
-    _logger.log(Logger::Notice, "Server starting...");
-    
-    _server.startClientAcceptor();
+        _logger.log(Logger::Notice, "Server starting...");
 
-    return 0;
+        _server.reset(new Server(_config));
+
+        _server->setFactory(new FilesystemInteractorFactory);
+
+        _server->startClientAcceptor();
+
+        return 0;
+    } catch (std::exception &ex) {
+        _logger.log(Logger::Critical, "Caught '", ex.what(), "'. At ", __FILE__, ':', __LINE__);
+    }
+
+    return 1;
 }
 
 void Application::printArgs()

@@ -38,6 +38,7 @@ public:
 
     static void setLevel(Level level);
     static char describeLevel(Level level);
+    static Level levelFromName(string name);
 
 private:
     static void logImpl(const string &line);

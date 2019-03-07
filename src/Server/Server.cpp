@@ -7,9 +7,12 @@
 #include <string.h>
 #include "ConnectionHandler.h"
 
-Server::Server(const std::string &ip, int port)
-    : ip(ip)
-    , port(port)
+static const string SERVER_IP = "server.ip";
+static const string SERVER_PORT = "server.port";
+
+Server::Server(const ConfigReader &config)
+    : ip(config[SERVER_IP])
+    , port(atoi(config[SERVER_PORT].c_str()))
     , _threadPool(8)
     , _logger(StringUtils::toString("Server ", StringUtils::hexToString(this)))
 {

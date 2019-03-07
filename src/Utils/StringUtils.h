@@ -33,6 +33,9 @@ public:
         ss << std::hex << value;
         return string("0x") + ss.str();
     }
+
+    static StringVector cropToStrings(const string &str, char seperator);
+
 };
 
 #endif // STRING_UTILS_H

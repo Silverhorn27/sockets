@@ -13,6 +13,7 @@
 #include "Mutlithreading/All.h"
 #include "Logger/Logger.h"
 #include "InteractorInterfaceFactory.h"
+#include "Utils/ConfigReader.h"
 
 
 class BindServerExeption : public std::exception {
@@ -26,7 +27,7 @@ class Server {
 private:
     int _fd;
     struct sockaddr_in _fdaddr;
-    std::string ip;
+    string ip;
     int port;
     bool _requestStop;
     ThreadPool _threadPool;
@@ -34,8 +35,7 @@ private:
     InteractorInterfaceFactory *_factory;
     
 public:
-    Server() = default;
-    Server(const string &ip, int port);
+    Server(const ConfigReader &config);
     void setFactory(InteractorInterfaceFactory *factory);
     void init(const string &ip, int port);
     void start();

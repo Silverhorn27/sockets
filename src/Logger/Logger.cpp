@@ -2,6 +2,8 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <cstring>
+#include <algorithm>
 
 using std::chrono::system_clock;
 using std::chrono::duration_cast;
@@ -33,6 +35,32 @@ char Logger::describeLevel(Logger::Level level)
     case Critical:return 'C';
     }
     return 'U'; // Unknown
+}
+
+Logger::Level Logger::levelFromName(string name)
+{
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+    if (name == "trace") {
+        return Level::Trace;
+    }
+    if (name == "debug") {
+        return Level::Debug;
+    }
+    if (name == "info") {
+        return Level::Info;
+    }
+    if (name == "notice") {
+        return Level::Notice;
+    }
+    if (name == "warning") {
+        return Level::Warning;
+    }
+    if (name == "error") {
+        return Level::Error;
+    }
+    if (name == "critical") {
+        return Level::Critical;
+    }
 }
 
 static string timeToString(int value, size_t len = 2)

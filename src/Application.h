@@ -4,14 +4,17 @@
 #include "definions.h"
 #include "Logger/Logger.h"
 #include "Server/Server.h"
+#include "Utils/ConfigReader.h"
+#include <memory>
 #include <vector>
-using std::vector;
+using std::unique_ptr;
 
 class Application
 {
     Logger _logger;
-    Server _server;
+    unique_ptr<Server> _server;
     vector<string> _args;
+    ConfigReader _config;
 
 public:
     Application(int argc, char **argv);
