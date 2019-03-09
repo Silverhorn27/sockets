@@ -39,7 +39,7 @@ void ConfigReader::init(const std::string &configFile)
     }
 
     auto fileSize = getFileSize(configFile);
-    if (fileSize > 1024*1024 && fileSize > 0) {
+    if (fileSize > 1024*1024) {
         ConfigReaderException(StringUtils::toString("Failed to read huge file " +
                                                     configFile + ". At " + __FILE__ + ":", __LINE__));
     }

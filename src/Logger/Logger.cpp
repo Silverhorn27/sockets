@@ -33,6 +33,7 @@ char Logger::describeLevel(Logger::Level level)
     case Warning: return 'W';
     case Error:   return 'E';
     case Critical:return 'C';
+    default:;
     }
     return 'U'; // Unknown
 }

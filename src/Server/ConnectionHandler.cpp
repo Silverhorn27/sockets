@@ -46,10 +46,7 @@ void ConnectionHandler::run()
 void ConnectionHandler::onReceive()
 {
     _logger.log(Logger::Trace, __PRETTY_FUNCTION__);
-    {
-        char l[]{"This is some big text. for something checks"};
 
-    }
     ssize_t recv_size = recv(_socketfd, &_buffer[0], sizeof(_buffer)-1, MSG_NOSIGNAL);
     if (recv_size <= 0) {
         if (recv_size < 0) {
@@ -57,7 +54,7 @@ void ConnectionHandler::onReceive()
 	    }
         close(_socketfd);
     } else {
-        _buffer[recv_size] = '\0';
+        _buffer[static_cast<size_t>(recv_size)] = '\0';
         _logger.log(Logger::Debug, &_buffer[0]);
         if (string(&_buffer[0]) == "close") {
             _logger.log(Logger::Info, "The connection is torn");
