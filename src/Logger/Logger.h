@@ -10,6 +10,7 @@ class Logger
 {
 public:
     enum Level : int {
+        Invalid,
         Trace,
         Debug,
         Info,

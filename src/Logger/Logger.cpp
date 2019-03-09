@@ -61,6 +61,7 @@ Logger::Level Logger::levelFromName(string name)
     if (name == "critical") {
         return Level::Critical;
     }
+    return Level::Invalid;
 }
 
 static string timeToString(int value, size_t len = 2)
