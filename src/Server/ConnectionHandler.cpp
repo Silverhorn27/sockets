@@ -56,7 +56,7 @@ void ConnectionHandler::onReceive()
     } else {
         _buffer[static_cast<size_t>(recv_size)] = '\0';
         _logger.log(Logger::Debug, &_buffer[0]);
-        if (string(&_buffer[0]) == "close") {
+        if (string(&_buffer[0]) == "exit\n") {
             _logger.log(Logger::Info, "The connection is torn");
             close(_socketfd);
             setState(State::Disconnect);

@@ -32,11 +32,11 @@ private:
     bool _requestStop;
     ThreadPool _threadPool;
     Logger _logger;
-    InteractorInterfaceFactory *_factory;
+    std::unique_ptr<InteractorInterfaceFactory> _factory;
     
 public:
     Server(const ConfigReader &config);
-    void setFactory(InteractorInterfaceFactory *factory);
+    void setFactory(std::unique_ptr<InteractorInterfaceFactory> factory);
     void init(const string &ip, int port);
     void start();
     void startClientAcceptor();

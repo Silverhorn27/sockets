@@ -19,9 +19,9 @@ Server::Server(const ConfigReader &config)
     init(ip, port);
 }
 
-void Server::setFactory(InteractorInterfaceFactory *factory)
+void Server::setFactory(std::unique_ptr<InteractorInterfaceFactory> factory)
 {
-    _factory = factory;
+    _factory = std::move(factory);
 }
 
 void Server::init(const string &ip, int port)
@@ -112,7 +112,7 @@ void Server::startClientAcceptor()
         int ret = poll(&p, 1, timeoutInMsec);
         if (ret > 0) {
             int slavefd = accept(p.fd, nullptr, nullptr);
-            ConnectionHandler::Ptr newConnection(new ConnectionHandler(_factory->createInteractorObject(), slavefd));
+            ConnectionHandler::Ptr newConnection(ConnectionHandler::Ptr(new ConnectionHandler(_factory->createInteractorObject(), slavefd)));
             _threadPool.start(std::move(newConnection), true);
         }
     }

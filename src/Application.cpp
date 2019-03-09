@@ -39,7 +39,7 @@ int Application::start()
 
         _server.reset(new Server(_config));
 
-        _server->setFactory(new FilesystemInteractorFactory);
+        _server->setFactory(std::unique_ptr<FilesystemInteractorFactory>(new FilesystemInteractorFactory));
 
         _server->startClientAcceptor();
 
