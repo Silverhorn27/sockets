@@ -40,7 +40,7 @@ void ConfigReader::init(const std::string &configFile)
 
     auto fileSize = getFileSize(configFile);
     if (fileSize > 1024*1024) {
-        ConfigReaderException(StringUtils::toString("Failed to read huge file " +
+        throw ConfigReaderException(StringUtils::toString("Failed to read huge file " +
                                                     configFile + ". At " + __FILE__ + ":", __LINE__));
     }
 
@@ -56,7 +56,7 @@ void ConfigReader::initFromString(const std::string &config)
     for (const string &line : StringUtils::cropToStrings(config, '\n')) {
         auto sections = StringUtils::cropToStrings(line, ' ');
         if (sections.size() != 3 || sections[1] != "=") {
-            ConfigReaderException(StringUtils::toString(string("Invalid format file") + ". At " + __FILE__ + ":", __LINE__));
+            throw ConfigReaderException(StringUtils::toString(string("Invalid format file") + ". At " + __FILE__ + ":", __LINE__));
         }
         _config.insert(std::make_pair(sections[0], sections[2]));
     }
