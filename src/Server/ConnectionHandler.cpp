@@ -6,11 +6,11 @@
 #include <string.h>
 #include <poll.h>
 
-ConnectionHandler::ConnectionHandler(InteractorInterface *interactor, int fd)
+ConnectionHandler::ConnectionHandler(std::unique_ptr<InteractorInterface> interactor, int fd)
     : _logger(StringUtils::toString("ConnectionHandler ", StringUtils::hexToString(this)))
     , _socketfd(fd)
     , _requestStop(false)
-    , _interactor(interactor)
+    , _interactor(std::move(interactor))
     , _buffer(DEFAULT_BUFFER_SIZE)
     , _state(State::Disconnect)
 {
@@ -47,7 +47,7 @@ void ConnectionHandler::onReceive()
 {
     _logger.log(Logger::Trace, __PRETTY_FUNCTION__);
 
-    ssize_t recv_size = recv(_socketfd, &_buffer[0], sizeof(_buffer)-1, MSG_NOSIGNAL);
+    ssize_t recv_size = recv(_socketfd, &_buffer[0], _buffer.size()-1, MSG_NOSIGNAL);
     if (recv_size <= 0) {
         if (recv_size < 0) {
             _logger.log(Logger::Debug, "error. recv_size is: ", recv_size);
@@ -84,18 +84,17 @@ void ConnectionHandler::setState(State state)
 
 bool ConnectionHandler::connectionActive() 
 {
-    return _state == State::Active ? true : false;
+    return _state == State::Active;
 }
 
 bool ConnectionHandler::setBufferSize(size_t bufferSize)
 {
-    if (bufferSize <= MAX_BUFFER_SIZE) {
-        _buffer.resize(bufferSize);
-        return true;
-    } else {
+    if (bufferSize > MAX_BUFFER_SIZE) {
         _logger.log(Logger::Error, "Exceeded MAX_BUFFER_SIZE: ", bufferSize);
         return false;
     }
+    _buffer.resize(bufferSize);
+    return true;
 }
 
 char ConnectionHandler::getStatus()

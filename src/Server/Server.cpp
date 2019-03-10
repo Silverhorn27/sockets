@@ -11,8 +11,11 @@ static const string SERVER_IP = "server.ip";
 static const string SERVER_PORT = "server.port";
 
 Server::Server(const ConfigReader &config)
-    : ip(config[SERVER_IP])
+    : _fd(-1)
+    , _fdaddr()
+    , ip(config[SERVER_IP])
     , port(atoi(config[SERVER_PORT].c_str()))
+    , _requestStop(false)
     , _threadPool(8)
     , _logger(StringUtils::toString("Server ", StringUtils::hexToString(this)))
 {
