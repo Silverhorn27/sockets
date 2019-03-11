@@ -106,7 +106,7 @@ void Server::startClientAcceptor()
     }
     listen(_fd, SOMAXCONN);
 
-    const int timeoutInMsec = 1000;
+    const int timeoutInMsec = 10000;
     while (!_requestStop) {
         struct pollfd p;
         bzero(&p, sizeof(p));
@@ -115,8 +115,13 @@ void Server::startClientAcceptor()
         int ret = poll(&p, 1, timeoutInMsec);
         if (ret > 0) {
             int slavefd = accept(p.fd, nullptr, nullptr);
-            ConnectionHandler::Ptr newConnection(ConnectionHandler::Ptr(new ConnectionHandler(_factory->createInteractorObject(), slavefd)));
+            ConnectionHandler::Ptr newConnection(std::unique_ptr<ConnectionHandler>(new ConnectionHandler(_factory->createInteractorObject(), slavefd)));
             _threadPool.start(std::move(newConnection), true);
+
+        } else {
+            _threadPool.stopAllThreads();
+            close(_fd);
+            _requestStop = true;
         }
     }
 }
