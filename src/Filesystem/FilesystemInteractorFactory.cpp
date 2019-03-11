@@ -6,7 +6,7 @@ FilesystemInteractorFactory::FilesystemInteractorFactory()
 {
 }
 
-InteractorInterface *FilesystemInteractorFactory::createInteractorObject()
+std::unique_ptr<InteractorInterface> FilesystemInteractorFactory::createInteractorObject()
 {
-    return new FilesystemInterator();
+    return std::unique_ptr<InteractorInterface>(new FilesystemInterator());
 }

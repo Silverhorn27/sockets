@@ -37,9 +37,9 @@ int Application::start()
 
         _logger.log(Logger::Notice, "Server starting...");
 
-        _server.reset(new Server(_config));
+        _server = std::unique_ptr<Server>(new Server(_config));
 
-        _server->setFactory(new FilesystemInteractorFactory);
+        _server->setFactory(std::unique_ptr<FilesystemInteractorFactory>(new FilesystemInteractorFactory));
 
         _server->startClientAcceptor();
 

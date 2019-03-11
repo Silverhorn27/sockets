@@ -11,17 +11,20 @@ static const string SERVER_IP = "server.ip";
 static const string SERVER_PORT = "server.port";
 
 Server::Server(const ConfigReader &config)
-    : ip(config[SERVER_IP])
+    : _fd(-1)
+    , _fdaddr()
+    , ip(config[SERVER_IP])
     , port(atoi(config[SERVER_PORT].c_str()))
+    , _requestStop(false)
     , _threadPool(8)
     , _logger(StringUtils::toString("Server ", StringUtils::hexToString(this)))
 {
     init(ip, port);
 }
 
-void Server::setFactory(InteractorInterfaceFactory *factory)
+void Server::setFactory(std::unique_ptr<InteractorInterfaceFactory> factory)
 {
-    _factory = factory;
+    _factory = std::move(factory);
 }
 
 void Server::init(const string &ip, int port)
@@ -103,7 +106,7 @@ void Server::startClientAcceptor()
     }
     listen(_fd, SOMAXCONN);
 
-    const int timeoutInMsec = 1000;
+    const int timeoutInMsec = 10000;
     while (!_requestStop) {
         struct pollfd p;
         bzero(&p, sizeof(p));
@@ -112,8 +115,13 @@ void Server::startClientAcceptor()
         int ret = poll(&p, 1, timeoutInMsec);
         if (ret > 0) {
             int slavefd = accept(p.fd, nullptr, nullptr);
-            ConnectionHandler::Ptr newConnection(new ConnectionHandler(_factory->createInteractorObject(), slavefd));
+            ConnectionHandler::Ptr newConnection(std::unique_ptr<ConnectionHandler>(new ConnectionHandler(_factory->createInteractorObject(), slavefd)));
             _threadPool.start(std::move(newConnection), true);
+
+        } else {
+            _threadPool.stopAllThreads();
+            close(_fd);
+            _requestStop = true;
         }
     }
 }

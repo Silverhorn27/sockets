@@ -10,7 +10,7 @@ class FilesystemInteractorFactory : public InteractorInterfaceFactory
 
 public:
     FilesystemInteractorFactory();
-    InteractorInterface* createInteractorObject() override;
+    std::unique_ptr<InteractorInterface> createInteractorObject() override;
 };
 
 #endif // FILESYSTEM_INTERACTOR_FACTORY_H

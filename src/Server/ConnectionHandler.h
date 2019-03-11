@@ -5,6 +5,7 @@
 #include "Logger/Logger.h"
 #include "InteractorInterface.h"
 
+
 class ConnectionHandler : public Runnable
 {
 public:
@@ -19,12 +20,12 @@ private:
     Logger _logger;
     int _socketfd;
     bool _requestStop;
-    InteractorInterface *_interactor;
+    std::unique_ptr<InteractorInterface> _interactor;
     Buffer _buffer;
     State _state;
 
 public:
-    ConnectionHandler(InteractorInterface *interactor, int fd);
+    ConnectionHandler(std::unique_ptr<InteractorInterface> interactor, int fd);
     void run() override;
     void requestStop();
     bool connectionActive();
