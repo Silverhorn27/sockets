@@ -10,7 +10,7 @@ ThreadPool::ThreadPool(size_t capacity)
 {
     _threads.reserve(capacity);
     for (size_t i = 0; i < capacity; ++i) {
-        _threads.push_back(Thread::Ptr(new Thread()));
+        _threads.push_back(std::make_unique<Thread>());
     }
 }
 

@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include <cstring>
+#include <strings.h>
 #include <poll.h>
 
 ConnectionHandler::ConnectionHandler(std::unique_ptr<InteractorInterface> interactor, int fd)
@@ -22,14 +23,15 @@ void ConnectionHandler::run()
     _logger.log(Logger::Trace, __PRETTY_FUNCTION__);
     const int timeoutInMsec = 5000;
     while (!_requestStop) {
-        struct pollfd p;
-        p.fd = _socketfd;
-        p.events = POLLIN;
+        struct pollfd pollData{};
+        bzero(&pollData, sizeof(pollData));
+        pollData.fd = _socketfd;
+        pollData.events = POLLIN;
 
-        int ret = poll(&p, 1, timeoutInMsec);
+        int ret = poll(&pollData, 1, timeoutInMsec);
         if (ret > 0) {
             setState(State::Connect);
-            if (p.revents & POLLIN) {
+            if (pollData.revents & POLLIN) {
                 setState(State::Active);
                 onReceive();
             }

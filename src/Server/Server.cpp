@@ -4,7 +4,7 @@
 #include <set>
 #include <thread>
 #include <poll.h>
-#include <string.h>
+#include <cstring>
 #include "ConnectionHandler.h"
 
 static const string SERVER_IP = "server.ip";
@@ -101,21 +101,21 @@ void Server::startClientAcceptor()
     if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0) {
         _logger.log(Logger::Error, "setsockopt(SO_REUSEADDR) failed");
     }
-    if (bind(_fd, (struct sockaddr *)(&_fdaddr), sizeof(_fdaddr)) < 0) {
+    if (bind(_fd, reinterpret_cast<struct sockaddr *>(&_fdaddr), sizeof(_fdaddr)) < 0) {
         throw BindServerExeption();
     }
     listen(_fd, SOMAXCONN);
 
     const int timeoutInMsec = 10000;
     while (!_requestStop) {
-        struct pollfd p;
-        bzero(&p, sizeof(p));
-        p.fd = _fd;
-        p.events = POLLIN;
-        int ret = poll(&p, 1, timeoutInMsec);
+        struct pollfd pollData{};
+        bzero(&pollData, sizeof(pollData));
+        pollData.fd = _fd;
+        pollData.events = POLLIN;
+        int ret = poll(&pollData, 1, timeoutInMsec);
         if (ret > 0) {
-            int slavefd = accept(p.fd, nullptr, nullptr);
-            ConnectionHandler::Ptr newConnection(std::unique_ptr<ConnectionHandler>(new ConnectionHandler(_factory->createInteractorObject(), slavefd)));
+            int slavefd = accept(pollData.fd, nullptr, nullptr);
+            ConnectionHandler::Ptr newConnection(std::make_unique<ConnectionHandler>(_factory->createInteractorObject(), slavefd));
             _threadPool.start(std::move(newConnection), true);
 
         } else {

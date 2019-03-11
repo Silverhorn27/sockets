@@ -11,7 +11,7 @@ using std::chrono::duration_cast;
 std::mutex Logger::_mutex;
 std::atomic<Logger::Level> Logger::_logLevel(Logger::Level::Info);
 
-Logger::Logger(const std::__cxx11::string &name)
+Logger::Logger(const string &name)
     : _name(name)
 {
 
