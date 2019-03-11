@@ -14,21 +14,22 @@ ThreadPool::ThreadPool(size_t capacity)
     }
 }
 
-Thread::Ptr &ThreadPool::getFreeThread() {
-    if (_stopping)
-        goto throw_exception;
-
-    for (Thread::Ptr &thread : _threads) {
-        if (!thread->isUsed()) {
-            return thread;
+Thread::Ptr &ThreadPool::getFreeThread()
+{
+    if (!_stopping) {
+        std::unique_lock locker(_sync);
+        for (Thread::Ptr &thread : _threads) {
+            if (!thread->isUsed()) {
+                return thread;
+            }
         }
     }
 
-    throw_exception:
     throw ExhausedThreads();
 }
 
-ThreadPool::~ThreadPool() {
+ThreadPool::~ThreadPool()
+{
     stopAllThreads();
     waitAll();
 }
@@ -40,7 +41,9 @@ ThreadPool *ThreadPool::defaultPool()
 
     return _defaultPool;
 }
-bool ThreadPool::start(Runnable::Ptr &&runObj, bool waitIfNoFree) {
+
+bool ThreadPool::start(Runnable::Ptr &&runObj, bool waitIfNoFree)
+{
     do {
         try {
             getFreeThread()->setRunnable(std::move(runObj));
@@ -59,16 +62,21 @@ bool ThreadPool::start(Runnable::Ptr &&runObj, bool waitIfNoFree) {
     return true;
 }
 
-void ThreadPool::stopAllThreads() {
+void ThreadPool::stopAllThreads()
+{
     _stopping.store(true);
     for (Thread::Ptr &p : _threads)
         p->stopLoop();
 }
 
-void ThreadPool::waitAll() {
-    repeat:
-    Thread::sleep(DELAY_THREAD_MSEC);
-    for (Thread::Ptr &p : _threads)
-        if (p->isUsed())
-            goto repeat;
+void ThreadPool::waitAll()
+{
+    do {
+        for (Thread::Ptr &p : _threads) {
+            if (p->isUsed()) {
+                continue;
+            }
+        }
+        break;
+    } while (true);
 }

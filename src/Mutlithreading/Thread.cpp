@@ -6,18 +6,19 @@ Thread::Thread() :
     _isUsed(false),
     _isStopped(false),
     _isActive(true)
-
 {
     _thrFuture = std::async(std::launch::async,
                            [&](){ mainLoop(); });
 }
 
-void Thread::setRunnable(Runnable::Ptr &&runnable) {
+void Thread::setRunnable(Runnable::Ptr &&runnable)
+{
     _isUsed = true;
     _runnable = std::move(runnable);
 }
 
-void Thread::mainLoop() {
+void Thread::mainLoop()
+{
     while (_isActive) {
         if (_runnable) {
             _runnable->run();
@@ -30,6 +31,7 @@ void Thread::mainLoop() {
     _isStopped.store(true);
 }
 
-void Thread::sleep(size_t msec) {
+void Thread::sleep(size_t msec)
+{
     std::this_thread::sleep_for(std::chrono::milliseconds(msec));
 }

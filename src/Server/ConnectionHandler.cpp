@@ -3,7 +3,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <string.h>
+#include <cstring>
 #include <poll.h>
 
 ConnectionHandler::ConnectionHandler(InteractorInterface *interactor, int fd)

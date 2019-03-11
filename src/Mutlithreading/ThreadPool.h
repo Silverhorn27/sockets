@@ -13,6 +13,7 @@ private:
     static ThreadPool *_defaultPool;
     std::vector<Thread::Ptr> _threads;
     std::atomic_bool _stopping;
+    std::mutex _sync;
 
 private:
     Thread::Ptr &getFreeThread();
