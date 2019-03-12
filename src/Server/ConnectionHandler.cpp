@@ -7,13 +7,19 @@
 #include <strings.h>
 #include <poll.h>
 
-ConnectionHandler::ConnectionHandler(std::unique_ptr<InteractorInterface> interactor, int fd)
+ConnectionHandler::~ConnectionHandler()
+{
+    _deleteCallback(this);
+}
+
+ConnectionHandler::ConnectionHandler(std::unique_ptr<InteractorInterface> interactor, int fd, DeleterCallback callback)
     : _logger(StringUtils::toString("ConnectionHandler ", StringUtils::hexToString(this)))
     , _socketfd(fd)
     , _requestStop(false)
     , _interactor(std::move(interactor))
     , _buffer(DEFAULT_BUFFER_SIZE)
     , _state(State::Disconnect)
+    , _deleteCallback(callback)
 {
 
 }
@@ -21,7 +27,7 @@ ConnectionHandler::ConnectionHandler(std::unique_ptr<InteractorInterface> intera
 void ConnectionHandler::run()
 {
     _logger.log(Logger::Trace, __PRETTY_FUNCTION__);
-    const int timeoutInMsec = 5000;
+    const int timeoutInMsec = 1000;
     while (!_requestStop) {
         struct pollfd pollData{};
         bzero(&pollData, sizeof(pollData));

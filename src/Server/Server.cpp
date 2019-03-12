@@ -10,6 +10,17 @@
 static const string SERVER_IP = "server.ip";
 static const string SERVER_PORT = "server.port";
 
+Server::~Server()
+{
+    _workerThread.stopLoop();
+    while (_workerThread.isUsed()) {
+        Thread::sleep(10);
+    }
+
+    requestStop();
+    waitFinished();
+}
+
 Server::Server(const ConfigReader &config)
     : _fd(-1)
     , _fdaddr()
@@ -40,63 +51,34 @@ void Server::init(const string &ip, int port)
     }
 }
 
-/*
-void Server::start() {
-    int enable = 1;
-    if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0) {
-        std::cout << "setsockopt(SO_REUSEADDR) failed" << std::endl;
-    }
-    if (bind(_fd, (struct sockaddr *)(&_fdaddr), sizeof(_fdaddr)) == -1) {
-        throw BindServerExeption();
-    }
-    listen(_fd, SOMAXCONN);
-    std::set<int> slave_sockets;
+void Server::start()
+{
+    _workerThread.setRunnable(this, false);
+}
 
-    while(true) {
-        fd_set set;
-        FD_ZERO(&set);
-        FD_SET(_fd, &set);
-        for(auto &socket : slave_sockets) {
-            FD_SET(socket, &set);
-        }
+void Server::requestStop()
+{
+    close(_fd);
+    _workerThread.stopLoop();
+    _threadPool.stopAllThreads();
+    _requestStop = true;
 
-        struct timeval timeout;
-        timeout.tv_sec = 10;
-        timeout.tv_usec = 0;
-
-        int max = std::max(_fd, *std::max_element(slave_sockets.begin(), slave_sockets.end()));
-        select(max+1, &set, NULL, NULL, NULL);
-        for(auto &socket : slave_sockets) {
-            if (FD_ISSET(socket, &set)) {
-                if (setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0) {
-                    std::cout << ("setsockopt faile\n");
-                }
-                if (setsockopt(socket, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) < 0) {
-                    std::cout << ("setsockopt faile\n");
-                }
-                static char buffer[1024];
-                int recv_size = recv(socket, buffer, 1024, MSG_NOSIGNAL);
-                if (recv_size <= 0) {
-                    if (recv_size < 0) {
-			            std::cout << "error. recv_size is: " << recv_size << std::endl;
-		            }
-                    close(socket);
-                    slave_sockets.erase(socket);
-                } else {
-                    send(socket, buffer, recv_size, MSG_NOSIGNAL);
-                }
-            }
-        }
-        if (FD_ISSET(_fd, &set)) {
-            int slave_socket = accept(_fd, 0, 0);
-            slave_sockets.insert(slave_socket);
-        }
+    std::unique_lock locker(_handlersMutex);
+    for (ConnectionHandler *handler : _handlers) {
+        handler->requestStop();
     }
 }
-*/
 
-void Server::startClientAcceptor()
+void Server::waitFinished()
 {
+    std::unique_lock runningLock(_runningMutex);
+    _threadPool.waitAll();
+}
+
+void Server::run()
+{
+    std::unique_lock runningLock(_runningMutex);
+
     int enable = 1;
     if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0) {
         _logger.log(Logger::Error, "setsockopt(SO_REUSEADDR) failed");
@@ -106,22 +88,35 @@ void Server::startClientAcceptor()
     }
     listen(_fd, SOMAXCONN);
 
-    const int timeoutInMsec = 10000;
+    const int timeoutInMsec = 1000;
+
+    auto deleteCallback = [this] (ConnectionHandler *handlerCaller) {
+        std::unique_lock locker(_handlersMutex);
+        _handlers.erase(handlerCaller);
+    };
+
     while (!_requestStop) {
         struct pollfd pollData{};
         bzero(&pollData, sizeof(pollData));
         pollData.fd = _fd;
         pollData.events = POLLIN;
+
         int ret = poll(&pollData, 1, timeoutInMsec);
-        if (ret > 0) {
+
+        if (ret > 0 && pollData.revents & POLLIN) {
             int slavefd = accept(pollData.fd, nullptr, nullptr);
-            ConnectionHandler::Ptr newConnection(std::make_unique<ConnectionHandler>(_factory->createInteractorObject(), slavefd));
+            auto newConnection = std::make_unique<ConnectionHandler>(
+                        _factory->createInteractorObject(), slavefd, deleteCallback);
+            {
+                std::unique_lock locker(_handlersMutex);
+                _handlers.insert(newConnection.get());
+            }
             _threadPool.start(std::move(newConnection), true);
 
+        } else if (ret != 0) {
+            requestStop();
         } else {
-            _threadPool.stopAllThreads();
-            close(_fd);
-            _requestStop = true;
+            _logger.log(Logger::Debug, "Server timeout");
         }
     }
 }

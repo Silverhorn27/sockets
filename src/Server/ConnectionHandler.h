@@ -6,6 +6,8 @@
 #include "InteractorInterface.h"
 
 
+using DeleterCallback = std::function<void(class ConnectionHandler *)>;
+
 class ConnectionHandler : public Runnable
 {
 public:
@@ -23,9 +25,11 @@ private:
     std::unique_ptr<InteractorInterface> _interactor;
     Buffer _buffer;
     State _state;
+    DeleterCallback _deleteCallback;
 
 public:
-    ConnectionHandler(std::unique_ptr<InteractorInterface> interactor, int fd);
+    ~ConnectionHandler() override;
+    ConnectionHandler(std::unique_ptr<InteractorInterface> interactor, int fd, DeleterCallback callback);
     void run() override;
     void requestStop();
     bool connectionActive();

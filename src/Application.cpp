@@ -41,7 +41,12 @@ int Application::start()
 
         _server->setFactory(std::make_unique<FilesystemInteractorFactory>());
 
-        _server->startClientAcceptor();
+        _server->start();
+
+        waitRequestForStop();
+
+        _server->requestStop();
+        _server->waitFinished();
 
         return 0;
     } catch (std::exception &ex) {
@@ -59,4 +64,12 @@ void Application::printArgs()
     }
 
     _logger.log(Logger::Info, "Running with args:", msg);
+}
+
+void Application::waitRequestForStop()
+{
+    string line;
+    do {
+        std::cin >> line;
+    } while (line != "exit");
 }

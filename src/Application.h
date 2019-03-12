@@ -25,6 +25,8 @@ public:
 
     void printArgs();
 
+    void waitRequestForStop();
+
 private:
     void init(int argc, char **argv);
 };
