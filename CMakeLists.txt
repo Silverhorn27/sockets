@@ -1,46 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
 ############################################################################################
 # Project settings
-set(APP_NAME sockets)
+set(APP_NAME application)
 project(${APP_NAME})
 
-set(PREFIX "src")
+add_subdirectory(Client)
+add_subdirectory(Server)
 
-set(SOURCES 
-    ${PREFIX}/main.cpp
-    ${PREFIX}/Filesystem/FilesystemInteractor.h
-    ${PREFIX}/Filesystem/FilesystemInteractor.cpp
-    ${PREFIX}/Filesystem/FilesystemInteractorFactory.h
-    ${PREFIX}/Filesystem/FilesystemInteractorFactory.cpp
-    ${PREFIX}/Logger/Logger.h
-    ${PREFIX}/Logger/Logger.cpp
-    ${PREFIX}/Server/Server.h
-    ${PREFIX}/Server/Server.cpp
-    ${PREFIX}/Server/InteractorInterface.h
-    ${PREFIX}/Server/InteractorInterfaceFactory.h
-    ${PREFIX}/Server/ConnectionHandler.h
-    ${PREFIX}/Server/ConnectionHandler.cpp
-    ${PREFIX}/Utils/StringUtils.h
-    ${PREFIX}/Utils/StringUtils.cpp
-    ${PREFIX}/Utils/ConfigReader.h
-    ${PREFIX}/Utils/ConfigReader.cpp
-    ${PREFIX}/definions.h
-    ${PREFIX}/Application.h
-    ${PREFIX}/Application.cpp
-    ${PREFIX}/Mutlithreading/All.h
-    ${PREFIX}/Mutlithreading/MultithreadingConstant.h
-    ${PREFIX}/Mutlithreading/Runnable.h
-    ${PREFIX}/Mutlithreading/Runnable.cpp
-    ${PREFIX}/Mutlithreading/Thread.h
-    ${PREFIX}/Mutlithreading/Thread.cpp
-    ${PREFIX}/Mutlithreading/ThreadPool.h
-    ${PREFIX}/Mutlithreading/ThreadPool.cpp)
-
-add_executable(${PROJECT_NAME} "${SOURCES}")
-
-add_definitions()
-
-set(CMAKE_CXX_FLAGS "-std=c++17 -g -O0 -pthread -Wall -Wno-address -Wno-nonnull-compare -Wno-padded -Wreturn-type -Wno-sign-compare -Wno-unused-function")
-
-include_directories(${PREFIX})
-
+add_custom_target(application)
+add_dependencies(application server client)
