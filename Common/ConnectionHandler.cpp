@@ -55,23 +55,15 @@ void ConnectionHandler::onReceive()
 {
     _logger.log(Logger::Trace, __PRETTY_FUNCTION__);
 
-    ssize_t recv_size = recv(_socketfd, &_buffer[0], _buffer.size()-1, MSG_NOSIGNAL);
+    auto recv_size = recv(_socketfd, &_buffer[0], _buffer.size()-1, MSG_NOSIGNAL);
     if (recv_size <= 0) {
         if (recv_size < 0) {
             _logger.log(Logger::Debug, "error. recv_size is: ", recv_size);
 	    }
-        close(_socketfd);
+        requestStop();
     } else {
         _buffer[static_cast<size_t>(recv_size)] = '\0';
-        _logger.log(Logger::Debug, &_buffer[0]);
-        if (string(&_buffer[0]) == "exit\n") {
-            _logger.log(Logger::Info, "The connection is torn");
-            close(_socketfd);
-            setState(State::Disconnect);
-            requestStop();
-        } else {
-            _interactor->onReceiveData(&_buffer[0], static_cast<size_t>(recv_size));
-        }
+        _interactor->onReceiveData(&_buffer[0], static_cast<size_t>(recv_size));
     }
 }
 
@@ -82,7 +74,10 @@ void ConnectionHandler::onTimeout()
 
 void ConnectionHandler::requestStop() 
 {
+    _logger.log(Logger::Debug, __PRETTY_FUNCTION__);
     _requestStop = true;
+    close(_socketfd);
+    setState(State::Disconnect);
 }
 
 void ConnectionHandler::setState(State state) 
@@ -115,4 +110,17 @@ char ConnectionHandler::getStatus()
         case Disconnect: return 'D';
     }
     return 'U';
+}
+
+int ConnectionHandler::sendData(const char *data, size_t lenght)
+{
+    auto ret = send(_socketfd, reinterpret_cast<const void *>(data), lenght, MSG_NOSIGNAL);
+    if (ret <= 0) {
+        if (ret < 0) {
+            _logger.log(Logger::Error, "send() was returned status ", ret);
+        }
+        requestStop();
+    }
+
+    return static_cast<int>(ret);
 }

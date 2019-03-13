@@ -8,6 +8,7 @@ FilesystemInterator::FilesystemInterator()
 void FilesystemInterator::onReceiveData(char *data, size_t countBytes)
 {
     _logger.log(Logger::Trace, __PRETTY_FUNCTION__);
+    _logger.log(Logger::Debug, "Got packet: '",  string(data), "'");
 }
 
 void FilesystemInterator::onSocketError()

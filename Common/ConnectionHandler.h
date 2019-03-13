@@ -35,6 +35,7 @@ public:
     bool connectionActive();
     bool setBufferSize(size_t bufferSize);
     char getStatus();
+    int sendData(const char *data, size_t lenght);
 
 private:
     void onReceive();

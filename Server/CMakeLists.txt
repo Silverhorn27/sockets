@@ -14,8 +14,8 @@ set(SOURCES
     ${PREFIX}/AppServer.cpp
     ${PREFIX}/Server/Server.h
     ${PREFIX}/Server/Server.cpp
-    ${PREFIX}/Server/ConnectionHandler.h
-    ${PREFIX}/Server/ConnectionHandler.cpp
+    ${PREFIXSOURCE}/ConnectionHandler.h
+    ${PREFIXSOURCE}/ConnectionHandler.cpp
     ${PREFIXSOURCE}/definions.h
     ${PREFIXSOURCE}/Factory/InteractorInterface.h
     ${PREFIXSOURCE}/Factory/InteractorInterfaceFactory.h

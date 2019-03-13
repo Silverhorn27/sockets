@@ -6,6 +6,3 @@ project(${APP_NAME})
 
 add_subdirectory(Client)
 add_subdirectory(Server)
-
-add_custom_target(application)
-add_dependencies(application server client)
