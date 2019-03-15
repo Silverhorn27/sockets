@@ -17,5 +17,7 @@ int AppClient::start()
 
     _client->start();
 
+    _client->requestStop();
+
     return 0;
 }

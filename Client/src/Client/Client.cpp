@@ -1,7 +1,20 @@
 #include "Client.h"
+#include "ConnectionHandler.h"
+
+#include <cstring>
 
 static const string SERVER_IP = "server.ip";
 static const string SERVER_PORT = "server.port";
+
+Client::~Client()
+{
+    _workerThread.stopLoop();
+    while (_workerThread.isUsed()) {
+        Thread::sleep(10);
+    }
+
+    requestStop();
+}
 
 Client::Client(const ConfigReader &config)
     : _logger(StringUtils::toString("Server ", StringUtils::hexToString(this)))
@@ -26,7 +39,23 @@ void Client::init(const string &ip, int port)
 
 void Client::start()
 {
-    char buffer[] = "exit\n";
-    connect(_fd, reinterpret_cast<struct sockaddr *>(&_fdaddr), sizeof(_fdaddr));
-    send(_fd, buffer, sizeof(buffer), MSG_NOSIGNAL);
+    _workerThread.setRunnable(this, false);
+}
+
+void Client::requestStop()
+{
+    close(_fd);
+    _workerThread.stopLoop();
+    _requestStop = true;
+}
+
+void Client::run()
+{
+    _logger.log(Logger::Debug, "run()");
+    std::unique_lock runningLock(_runningMutex);
+    std::cout << "dasfadsf";
+    connect(_fd, reinterpret_cast<struct sockaddr *>(&_fdaddr), sizeof (_fdaddr));
+    char Buffer[] = "close";
+        send(_fd, Buffer, sizeof(Buffer), MSG_NOSIGNAL);
+        recv(_fd, Buffer, sizeof(Buffer), MSG_NOSIGNAL);
 }

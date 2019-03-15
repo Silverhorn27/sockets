@@ -14,21 +14,27 @@
 #include "definions.h"
 #include "Logger/Logger.h"
 #include "Utils/ConfigReader.h"
+#include "Mutlithreading/All.h"
+#include "Factory/InteractorInterfaceFactory.h"
 
-class Client {
+class Client : public Runnable {
     Logger _logger;
     int _fd;
     struct sockaddr_in _fdaddr;
     string _ip;
     int _port;
     bool _requestStop;
+    Thread _workerThread;
+    std::mutex _runningMutex;
 
 public:
+    ~Client() override;
     Client(const ConfigReader &config);
-
     void start();
+    void requestStop();
 
-private:
+public:
+    void run() override;
     void init(const string &ip, int port);
 };
 
