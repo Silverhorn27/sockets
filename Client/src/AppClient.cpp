@@ -17,6 +17,8 @@ int AppClient::start()
 
     _client->start();
 
+    Thread::sleep(10000);
+
     _client->requestStop();
 
     return 0;

@@ -6,6 +6,7 @@
 #include <mutex>
 #include <atomic>
 
+
 class Logger
 {
 public:
@@ -45,5 +46,8 @@ private:
     static void logImpl(const string &line);
 
 };
+
+#define TRACE_FUNCTION() \
+    _logger.log(Logger::Trace, __PRETTY_FUNCTION__)
 
 #endif // LOGGER_H

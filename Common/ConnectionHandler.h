@@ -36,11 +36,16 @@ public:
     bool setBufferSize(size_t bufferSize);
     char getStatus();
     int sendData(const char *data, size_t lenght);
+    int available();
 
 private:
+    int send(const char *data, size_t lenght);
+    int receiveData(char *data, size_t lenght);
     void onReceive();
     void onTimeout();
     void setState(State state);
+    int fullySend(const void *data, size_t lenght);
+    int fullyRecv(void *data, size_t lenght);
 };
 
 #endif // CONNECTION_HANDLER_H

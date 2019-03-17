@@ -16,6 +16,8 @@
 #include "Utils/ConfigReader.h"
 #include "Mutlithreading/All.h"
 #include "Factory/InteractorInterfaceFactory.h"
+#include "Filesystem/FilesystemInteractor.h"
+#include "ConnectionHandler.h"
 
 class Client : public Runnable {
     Logger _logger;
@@ -26,6 +28,7 @@ class Client : public Runnable {
     bool _requestStop;
     Thread _workerThread;
     std::mutex _runningMutex;
+    ConnectionHandler::Ptr _handler;
 
 public:
     ~Client() override;

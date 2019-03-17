@@ -40,6 +40,11 @@ void Client::init(const string &ip, int port)
 void Client::start()
 {
     _workerThread.setRunnable(this, false);
+    Thread::sleep(300);
+    for (int i = 0; i < 1000; ++i){
+        string str = string("hello ") + StringUtils::toString(i);
+        dynamic_cast<ConnectionHandler *>(_handler.get())->sendData(str.data(), str.length());
+    }
 }
 
 void Client::requestStop()
@@ -51,11 +56,14 @@ void Client::requestStop()
 
 void Client::run()
 {
-    _logger.log(Logger::Debug, "run()");
+    TRACE_FUNCTION();
     std::unique_lock runningLock(_runningMutex);
-    std::cout << "dasfadsf";
-    connect(_fd, reinterpret_cast<struct sockaddr *>(&_fdaddr), sizeof (_fdaddr));
-    char Buffer[] = "close";
-        send(_fd, Buffer, sizeof(Buffer), MSG_NOSIGNAL);
-        recv(_fd, Buffer, sizeof(Buffer), MSG_NOSIGNAL);
+    if (-1 == connect(_fd, reinterpret_cast<struct sockaddr *>(&_fdaddr), sizeof (_fdaddr))) {
+        _logger.log(Logger::Error, "Failed to connect to server");
+    }
+
+    _handler.reset(new ConnectionHandler(std::unique_ptr<InteractorInterface>(new FilesystemInterator),
+                              _fd, [](class ConnectionHandler *){}));
+
+    _handler->run();
 }

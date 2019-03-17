@@ -14,6 +14,8 @@ set(SOURCES
     ${PREFIX}/AppClient.cpp
     ${PREFIX}/Client/Client.h
     ${PREFIX}/Client/Client.cpp
+    ${PREFIXSOURCE}/ConnectionHandler.h
+    ${PREFIXSOURCE}/ConnectionHandler.cpp
     ${PREFIXSOURCE}/definions.h
     ${PREFIXSOURCE}/Filesystem/FilesystemInteractor.h
     ${PREFIXSOURCE}/Filesystem/FilesystemInteractor.cpp
