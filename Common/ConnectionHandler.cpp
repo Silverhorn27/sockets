@@ -179,11 +179,14 @@ int ConnectionHandler::fullySend(const void *data, size_t lenght)
     TRACE_FUNCTION();
     size_t sent = 0;
     ssize_t lastSent = 0;
-    while (sent != lenght && lastSent != -1) {
-        sent += static_cast<size_t>(lastSent);
+    while (sent != lenght) {
         lastSent = ::send(_socketfd, reinterpret_cast<const char*>(data) + sent, lenght, MSG_NOSIGNAL);
+        if (lastSent == -1) {
+            return -1;
+        }
+        sent += static_cast<size_t>(lastSent);
     }
-    return static_cast<int>(lastSent == -1 ? -1 : static_cast<int>(sent));
+    return static_cast<int>(sent);
 }
 
 int ConnectionHandler::fullyRecv(void *data, size_t lenght)
@@ -191,9 +194,12 @@ int ConnectionHandler::fullyRecv(void *data, size_t lenght)
     TRACE_FUNCTION();
     size_t received = 0;
     ssize_t lastReceived = 0;
-    while (received != lenght && lastReceived != -1) {
+    while (received != lenght) {
+        lastReceived = ::recv(_socketfd, reinterpret_cast<char *>(data) + received, lenght, MSG_NOSIGNAL);
+        if (lastReceived == -1) {
+            return -1;
+        }
         received += static_cast<size_t>(lastReceived);
-        lastReceived += ::recv(_socketfd, reinterpret_cast<char *>(data) + received, lenght, MSG_NOSIGNAL);
     }
-    return static_cast<int>(lastReceived == -1 ? -1 : static_cast<int>(received));
+    return static_cast<int>(received);
 }
